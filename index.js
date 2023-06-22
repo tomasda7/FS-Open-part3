@@ -71,10 +71,19 @@ const randomIdGenerator = () => {
 app.post('/api/persons', (request, response) => {
   const { name, number } = request.body;
 
+  const existPerson = persons.find(person =>
+    person.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+  );
+
   if(!name || !number) {
     return response.status(400).json({
       error: 'Mandatory data is missing.'
     })
+  }
+  else if(existPerson) {
+    return response.status(409).json({
+      error: 'Name must be unique.'
+    });
   }
 
   const newPerson = {
