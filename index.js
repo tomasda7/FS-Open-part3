@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const Person = require('./models/person');
+const person = require('./models/person');
 
 const app = express();
 
@@ -77,37 +78,23 @@ app.delete('/api/persons/:id', (request, response) => {
   response.sendStatus(204);
 })
 
-const randomIdGenerator = () => {
-  return Math.floor(Math.random() * 10000);
-}
-
 app.post('/api/persons', (request, response) => {
   const { name, number } = request.body;
-
-  const existPerson = persons.find(person =>
-    person.name.toLocaleLowerCase() === name.toLocaleLowerCase()
-  );
 
   if(!name || !number) {
     return response.status(400).json({
       error: 'Mandatory data is missing.'
     })
   }
-  else if(existPerson) {
-    return response.status(409).json({
-      error: 'Name must be unique.'
-    });
-  }
 
-  const newPerson = {
-    id: randomIdGenerator(),
+  const person = new Person({
     name: name,
     number: number
-  }
+  })
 
-  persons = [...persons, newPerson];
-
-  response.status(201).json(newPerson);
+  person.save().then(newPerson => {
+    response.status(201).json(newPerson);
+  })
 })
 
 app.use(unknownEndpoint);
